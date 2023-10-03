@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, send_from_directory
+import io
+from flask import Flask, request, send_file
 from PIL import Image
 
 app = Flask(__name__)
@@ -22,12 +23,21 @@ def index():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            # 이미지 상하 반전 처리
+            # Flip the image upside down
             img = Image.open(filepath)
             img_rotated = img.rotate(180)
-            img_rotated.save(filepath)
+            
+            # Save the rotated image to a BytesIO object
+            byte_io = io.BytesIO()
+            img_rotated.save(byte_io, 'JPEG')
+            byte_io.seek(0)
 
-            return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+           return send_file(
+                byte_io,
+                mimetype='image/jpeg',
+                as_attachment=True,
+                attachment_filename=filename
+           )
 
     return '''
     <!doctype html>
@@ -37,7 +47,7 @@ def index():
       <input type=file name=file>
       <input type=submit value=Upload>
     </form>
-    '''
+   '''
 
 if __name__ == "__main__":
    app.run(debug=True)

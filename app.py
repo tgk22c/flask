@@ -15,6 +15,9 @@ def index():
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
+            # Ensure the upload directory exists
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
             filename = file.filename
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)

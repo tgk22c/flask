@@ -36,18 +36,18 @@ def index():
                 byte_io,
                 mimetype='image/jpeg',
                 as_attachment=True,
-                attachment_filename=filename
-           )
-
-    return '''
-    <!doctype html>
-    <title>Upload a .jpg File</title>
-    <h1>Upload a .jpg File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-   '''
+                attachment_filename=filename)
+    else:
+        return '''
+        <!doctype html>
+        <title>Upload a .jpg File</title>
+        <h1>Upload a .jpg File</h1>
+        <form method=post enctype=multipart/form-data>
+          <input type=file name=file>
+          <input type=submit value=Upload>
+        </form>
+       '''
 
 if __name__ == "__main__":
    app.run(debug=True)
+``

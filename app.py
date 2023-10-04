@@ -27,7 +27,7 @@ def index():
             img_rotated = img.rotate(180)
             img_rotated.save(filepath)
 
-            return send_from_directory(directory=app.config['UPLOAD_FOLDER'], filename=filename, as_attachment=True)
+           return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
     return '''
     <!doctype html>

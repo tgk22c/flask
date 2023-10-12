@@ -18,5 +18,7 @@ def predict():
 
     prediction = model.predict(normalized_image.reshape(1, -1))   # 모델을 사용하여 이미지의 숫자를 예측합니다. shape 변경
     
-    return jsonify({'prediction': prediction.tolist()})   # 예측 결과를 JSON 형식으로 반환합니다.
+    final_prediction = np.argmax(prediction)   # 가장 높은 확률값을 가진 클래스 선택
+
+    return jsonify({'prediction': final_prediction.tolist()})   # 예측 결과를 JSON 형식으로 반환합니다.
 

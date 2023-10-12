@@ -16,6 +16,7 @@ def predict():
 
     model = load_model('model.h5')  # 학습된 모델을 로드합니다.
 
-    prediction = model.predict(normalized_image.reshape(1, 28, 28))   # 모델을 사용하여 이미지의 숫자를 예측합니다.
+    prediction = model.predict(normalized_image.reshape(1, -1))   # 모델을 사용하여 이미지의 숫자를 예측합니다. shape 변경
     
     return jsonify({'prediction': prediction.tolist()})   # 예측 결과를 JSON 형식으로 반환합니다.
+

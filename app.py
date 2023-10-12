@@ -24,5 +24,3 @@ def predict():
     
     return jsonify({'prediction': int(np.argmax(prediction))})   # 예측 결과 중 가장 확률이 높은 클래스의 인덱스(여기서는 숫자)를 JSON 형태로 반환합니다.
 
-if __name__ == '__main__':
-   app.run(host='0.0.0.0', port=5000)   # 메인 모듈로 실행될 때 웹 서버를 시작합니다. 외부 접속 가능하도록 host는 '0.0.0.0'으로 설정하고 포트 번호는 임의로 설정할 수 있습니다.

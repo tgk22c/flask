@@ -22,4 +22,4 @@ def predict():
   
     final_prediction=np.argmax(prediction)
 
-   return jsonify({'prediction': final_prediction.tolist()})
+    return jsonify({'prediction': final_prediction.tolist()})

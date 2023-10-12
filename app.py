@@ -19,6 +19,6 @@ def predict():
     prediction=model.predict(input_data)
 
   
-   final_prediction=np.argmax(prediction)
+    final_prediction=np.argmax(prediction)
 
    return jsonify({'prediction': final_prediction.tolist()})

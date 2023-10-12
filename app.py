@@ -1,38 +1,31 @@
 from flask import Flask, request
+import tensorflow as tf
 import numpy as np
-from PIL import Image
-import io
 
-def create_app():
-    app = Flask(__name__)
-    model = None
+app = Flask(__name__)
 
-    @app.before_first_request
-    def load_model_to_app():
-        from tensorflow.python.keras.models import load_model
-        app.model = load_model('model.h5')
+# 모델 불러오기
+model = tf.keras.models.load_model('your_model_path')
 
-    @app.route('/predict', methods=['POST'])
-    def predict():
-        if 'file' not in request.files:
-            return 'No file part', 400
+@app.route('/predict', methods=['POST'])
+def predict():
+    file = request.files['file']
+    image = preprocess_image(file)
+    prediction = make_prediction(image)
+    return prediction
 
-        file = request.files['file']
-        if file.filename == '':
-            return 'No selected file', 400
+def preprocess_image(file):
+    img = tf.keras.preprocessing.image.load_img(file, target_size=(28, 28), color_mode='grayscale')
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array /= 255.0  # 이미지 정규화
+    return np.expand_dims(img_array, axis=0)
 
-        try:
-            img = Image.open(io.BytesIO(file.read())).convert("L") # Open the image file and convert it to grayscale
-            img = img.resize((28, 28)) # Resize the image to 28x28 pixels as required by the model
-            img_arr = np.array(img) / 255.0 # Convert the image to a numpy array and normalize pixel values
-            
-            prediction = app.model.predict(img_arr.reshape(1,784)) # Reshape the array for model input and make prediction
-            predicted_class = np.argmax(prediction) # Get index of highest probability class from softmax output
-            
-            return str(predicted_class), 200
+def make_prediction(image):
+    predictions = model.predict(image)
+    class_index = np.argmax(predictions[0])
+    
+    # 클래스 인덱스에 따라 예측 결과 반환 (여기서는 단순히 클래스 인덱스를 문자열로 변환하여 반환)
+    return str(class_index)
 
-        except Exception as e:
-             return str(e), 500 
-
-    return app
-
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

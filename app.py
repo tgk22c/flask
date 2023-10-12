@@ -1,30 +1,42 @@
-from flask import Flask, request, jsonify
-from tensorflow.keras.models import load_model
-from PIL import Image
+from flask import Flask, request
 import numpy as np
+from PIL import Image
+import io
 
-app = Flask(__name__)
-model = load_model('model.h5')
+def create_app():
+    app = Flask(__name__)
+    model = None
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    file = request.files['image']
-    img_raw = Image.open(file.stream).convert('L') # Convert to grayscale
+    @app.before_first_request
+    def load_model_to_app():
+        from tensorflow.python.keras.models import load_model
+        app.model = load_model('model.h5')
 
-    # Resize image to 28x28 pixels 
-    img_resized = img_raw.resize((28, 28), Image.ANTIALIAS)
+    @app.route('/predict', methods=['POST'])
+    def predict():
+        if 'file' not in request.files:
+            return 'No file part', 400
 
-    # Convert image data to numpy array and normalize
-    img_arr = np.array(img_resized) / 255.0
-    
-    # Reshape for model input and make prediction
-    img_arr = img_arr.reshape((1,) + (img_arr.shape[0], img_arr.shape[1], 1))
-    
-    prediction = model.predict(img_arr)
-    
-    predicted_class = np.argmax(prediction) # Get class with highest probability
-    
-    return jsonify({'prediction': int(predicted_class)}) # Return as JSON
+        file = request.files['file']
+        if file.filename == '':
+            return 'No selected file', 400
+
+        try:
+            img = Image.open(io.BytesIO(file.read())).convert("L") # Open the image file and convert it to grayscale
+            img = img.resize((28, 28)) # Resize the image to 28x28 pixels as required by the model
+            img_arr = np.array(img) / 255.0 # Convert the image to a numpy array and normalize pixel values
+            
+            prediction = app.model.predict(img_arr.reshape(1,784)) # Reshape the array for model input and make prediction
+            predicted_class = np.argmax(prediction) # Get index of highest probability class from softmax output
+            
+            return str(predicted_class), 200
+
+        except Exception as e:
+             return str(e), 500 
+
+    return app
+
 
 if __name__ == '__main__':
-   app.run()
+   app=create_app()
+   app.run(host='0.0.0.0', port=5000)
